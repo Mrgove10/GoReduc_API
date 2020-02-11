@@ -1,9 +1,9 @@
 'use strict';
 
-var AWS = require('aws-sdk'),
-	documentClient = new AWS.DynamoDB.DocumentClient(); 
+var AWS = require('aws-sdk');
+var	documentClient = new AWS.DynamoDB.DocumentClient(); 
 
-exports.readall = function(event, context, callback){
+exports.handler = function(event, context, callback){
 	var params = {
 		TableName : process.env.TABLE_NAME
 	};

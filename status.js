@@ -1,8 +1,8 @@
 exports.handler = async (event) => {
-    // TODO implement
     const response = {
         statusCode: 200,
-        staus : "UP",
+        staus: "UP",
+        serverTime: new Date() 
     };
     return response;
 };
