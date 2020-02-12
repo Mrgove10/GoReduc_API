@@ -8,7 +8,7 @@ exports.handler = function (event, context, callback) {
     if (id == "all") {
         var params = {
             TableName: process.env.TABLE_NAME
-        }
+        };
         documentClient.scan(params, function (err, data) {
             if (err) {
                 console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
