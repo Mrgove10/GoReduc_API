@@ -18,9 +18,6 @@ exports.handler = function (event, context, callback) {
             callback(null, data);
         }
     });
-    //    documentClient.put(params, function (err, data) {
-    //      callback(err, data);
-    //    });
 };
 
 function uuidv4() {
