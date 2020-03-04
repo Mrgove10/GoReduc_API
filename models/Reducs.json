@@ -1,15 +1,37 @@
+// Base
 {
     "ID": "10734202-e1fc-4df5-81c7-0e65eef0a5f8",
     "ScanID": "10734202",
-    "Titre": "Titre",
+    "Title": "Title",
     "Description": "Bonjour je suis la desciption",
-    "Categories": [
+    "ProductCategories": [
         1,
         5,
         6
     ],
     "ReductionPercent": "15",
     "CreationDate": "2020-02-12T08:14:45.450Z",
+    "Valid": true,
+    "ValidUntil": "2020-02-12T08:14:45.450Z",
+    "ValidStores": [
+        1,
+        5,
+        6,
+        3,
+        2
+    ]
+}
+
+//Request post missing ID and scanID
+{
+    "Title": "Title",
+    "Description": "Bonjour je suis la desciption",
+    "ProductCategories": [
+        1,
+        5,
+        6
+    ],  
+    "ReductionPercent": "15",
     "Valid": true,
     "ValidUntil": "2020-02-12T08:14:45.450Z",
     "ValidStores": [
