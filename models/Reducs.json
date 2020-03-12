@@ -12,6 +12,7 @@
     "ReductionPercent": "15",
     "CreationDate": "2020-02-12T08:14:45.450Z",
     "Valid": true,
+    "UserView": true,
     "ValidUntil": "2020-02-12T08:14:45.450Z",
     "ValidStores": [
         1,
@@ -33,6 +34,7 @@
     ],  
     "ReductionPercent": "15",
     "Valid": true,
+    "UserView": true,
     "ValidUntil": "2020-02-12T08:14:45.450Z",
     "ValidStores": [
         1,

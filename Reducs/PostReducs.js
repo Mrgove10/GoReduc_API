@@ -20,6 +20,7 @@ exports.handler = function (event, context, callback) {
             "ReductionPercent": body.ReductionPercent,
             "CreationDate": new Date().toISOString(),
             "Valid": body.Valid,
+            "UserView": body.UserView,
             "ValidUntil": body.ValidUntil,
             "ValidStores": body.ValidStores
         };
@@ -51,7 +52,7 @@ exports.handler = function (event, context, callback) {
             }
         });
     }
-};
+}
 
 /**
  * Creates the error responce body
