@@ -1,0 +1,11 @@
+{
+  "name": "gr-api",
+  "version": "1.0.0",
+  "description": "Go reduc API",
+  "main": "handler.js",
+  "author": "Adrien R",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^7.0.2"
+  }
+}

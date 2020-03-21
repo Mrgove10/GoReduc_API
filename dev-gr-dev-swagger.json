@@ -1,0 +1,60 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "2020-03-21T15:51:09Z",
+    "title": "dev-gr"
+  },
+  "host": "jsgve3q5wg.execute-api.us-east-1.amazonaws.com",
+  "basePath": "/dev",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "responses": {}
+      }
+    },
+    "/reducs/create": {
+      "post": {
+        "responses": {}
+      }
+    },
+    "/reducs/create/image": {
+      "post": {
+        "responses": {}
+      }
+    },
+    "/reducs/{id}": {
+      "get": {
+        "responses": {}
+      },
+      "put": {
+        "responses": {}
+      },
+      "delete": {
+        "responses": {}
+      }
+    },
+    "/users/create": {
+      "post": {
+        "responses": {}
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "responses": {}
+      }
+    },
+    "/users/{id}/addreduc": {
+      "post": {
+        "responses": {}
+      }
+    },
+    "/users/{id}/info": {
+      "get": {
+        "responses": {}
+      }
+    }
+  }
+}

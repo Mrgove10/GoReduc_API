@@ -1,0 +1,159 @@
+service: gr
+
+# custom variables
+custom:
+  settings:
+    REDUCS_TABLE : gr_reducs
+    USERS_TABLE : gr_users
+    BUCKET : gr_images
+
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  environment: ${self:custom.settings}
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - s3:PutObject
+        - s3:PutObjectAcl
+      Resource:
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.REDUCS_TABLE}"
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.USERS_TABLE}"
+        - "arn:aws:s3:::${self:custom.settings.BUCKET}/*"
+
+
+#All the functions and there endpoints
+functions:
+  #Status
+  status:
+    handler: handler.status
+    description: Status of the api 
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /
+        method: get
+
+  #Reducs
+  createReduc:
+    handler: handler.createReduc
+    description: Creates a reduction
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /reducs/create
+        method: post
+  imageReduc:
+    handler: handler.imageReduc
+    description: Creates post am image for a reduction
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /reducs/create/image
+        method: post
+  getReducs:
+    handler: handler.getReducs
+    description: Gets a all or a specifique reduction
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /reducs/{id}
+        method: get
+  updateReduc:
+    handler: handler.updateReduc
+    description: Updates a reduc
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /reducs/{id}
+        method: put
+  deleteReduc:
+    handler: handler.deleteReduc
+    description: Deletes a reduc
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /reducs/{id}
+        method: delete
+  
+  #Users
+  createUser:
+    handler: handler.createUser
+    description: Creates a user
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /users/create
+        method: post
+  getUser:
+    handler: handler.getUser
+    description: Returns if a user existes or not 
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /users/{id}
+        method: get
+  addReducToUser:
+    handler: handler.addReducToUser
+    description: Adds a reduc to a specifique user
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /users/{id}/addreduc
+        method: post
+  infoUser:
+    handler: handler.infoUser
+    description: Returns all the information on a user
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /users/{id}/info
+        method: get
+
+
+resources:
+  Resources:
+    ReducsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "S" #S = string
+        KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        TableName: ${self:custom.settings.REDUCS_TABLE}
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "S" #S = string
+        KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        TableName: ${self:custom.settings.USERS_TABLE}
