@@ -4,6 +4,7 @@
   "description": "Go reduc API",
   "main": "handler.js",
   "author": "Adrien R",
+  "repository": "https://github.com/Mrgove10/GoReduc_API.git",
   "license": "MIT",
   "dependencies": {
     "uuid": "^7.0.2"

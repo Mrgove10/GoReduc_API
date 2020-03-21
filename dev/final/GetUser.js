@@ -1,6 +1,6 @@
 'use strict';
 
-var AWS = require('aws-sdk');
+var AWS = require('./node_modules/aws-sdk');
 var documentClient = new AWS.DynamoDB.DocumentClient();
 
 /**
