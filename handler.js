@@ -1,11 +1,11 @@
 'use strict';
-//https://github.com/hidjou/classsed-lambda-dynamodb-api/blob/master/handler.js
+
 //Imports
 const AWS = require('aws-sdk');
 const uuid = require('uuid/v4');
 
 const db = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
-const s3 = new AWS.S3()
+const s3 = new AWS.S3();
 
 //Constant table names
 const ReducsTable = process.env.REDUCS_TABLE;
@@ -90,9 +90,9 @@ module.exports.createReduc = (event, context, callback) => {
  * Adds an image
  */
 module.exports.imageReduc = (event, context, callback) => {
-  callback(null, response(501, { message: 'Not implemented' }))
+  callback(null, response(501, { message: 'Not implemented' }));
 
-  let buffer = Buffer.from(event.body, 'base64')
+  let buffer = Buffer.from(event.body, 'base64');
   console.log("Starting File saving!");
 
   const params = {
@@ -108,7 +108,7 @@ module.exports.imageReduc = (event, context, callback) => {
       callback(null, response(200, { message: 'item created' }));
     })
     .catch(err => response(null, response(err.statusCode, err)));
-}
+};
 
 /**
  * Get all reducs
@@ -178,7 +178,7 @@ module.exports.updateReduc = (event, context, callback) => {
   return db.update(params)
     .promise()
     .then(res => {
-      callback(null, response(200, res))
+      callback(null, response(200, res));
     })
     .catch(err => response(null, response(err.statusCode, err)));
 };
@@ -196,10 +196,10 @@ module.exports.deleteReduc = (event, context, callback) => {
     TableName: ReducsTable
   };
 
-  returndb.delete(params)
+  return db.delete(params)
     .promise()
     .then(() => {
-      callback(null, response(200, { message: 'reduc deleted succesfully' }))
+      callback(null, response(200, { message: 'reduc deleted succesfully' }));
     })
     .catch(err => response(null, response(err.statusCode, err)));
 };
@@ -208,26 +208,70 @@ module.exports.deleteReduc = (event, context, callback) => {
  * Creates a user
  */
 module.exports.createUser = (event, context, callback) => {
-  callback(null, response(501, { message: 'Not implemented' }))
-}
+  const reqBody = JSON.parse(event.body);
+
+  if (reqBody.id !== null && reqBody.id !== undefined) {
+    return callback(null, response(400, { error: 'user must have an id' }));
+  }
+
+  var user = {
+    id: reqBody.ID,
+    SignUpDate: new Date().toISOString(),
+    Reducs: []
+  };
+
+  const params = {
+    TableName: UsersTable,
+    Item: user
+  };
+
+  return db.put(params)
+    .promise()
+    .then(() => {
+      callback(null, response(201, user));
+    })
+    .catch(err => response(null, response(err.statusCode, err)));
+};
 
 /**
  * Gets a user
  */
 module.exports.getUser = (event, context, callback) => {
-  callback(null, response(501, { message: 'Not implemented' }))
-}
+  callback(null, response(501, { message: 'Not implemented' }));
+};
 
 /**
  * Adds a reduc to the user
  */
 module.exports.addReducToUser = (event, context, callback) => {
-  callback(null, response(501, { message: 'Not implemented' }))
-}
+  const userid = event.pathParameters.id;
+  const reqBody = JSON.parse(event.body);
+  const scanid = reqBody.ScanId;
+
+  const params = {
+    Key: {
+      id: userid
+    },
+    TableName: UsersTable,
+    ConditionExpression: 'attribute_exists(id)',
+    UpdateExpression: 'ADD Reducs :r',
+    ExpressionAttributeValues: {
+      ':r': scanid
+    },
+    ReturnValues: 'ALL_NEW'
+  };
+
+  return db.update(params)
+    .promise()
+    .then(res => {
+      callback(null, response(200, res));
+    })
+    .catch(err => response(null, response(err.statusCode, err)));
+};
 
 /**
  * Gets the user info
  */
 module.exports.infoUser = (event, context, callback) => {
-  callback(null, response(501, { message: 'Not implemented' }))
-}
+  callback(null, response(501, { message: 'Not implemented' }));
+};
