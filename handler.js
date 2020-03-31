@@ -105,7 +105,11 @@ module.exports.imageReduc = (event, context, callback) => {
   s3.putObject(params)
     .promise()
     .then(res => {
-      callback(null, response(200, { message: 'item created' }));
+      callback(null, response(200,
+        {
+          message: 'item created'
+        }
+      ));
     })
     .catch(err => response(null, response(err.statusCode, err)));
 };
@@ -145,7 +149,11 @@ module.exports.getReducs = (event, context, callback) => {
           callback(null, response(200, res.Item));
         }
         else {
-          callback(null, response(404, { error: 'Reduc Not found' }));
+          callback(null, response(404,
+            {
+              error: 'Reduc Not found'
+            }
+          ));
         }
       })
       .catch(err => response(null, response(err.statusCode, err)));
@@ -199,7 +207,11 @@ module.exports.deleteReduc = (event, context, callback) => {
   return db.delete(params)
     .promise()
     .then(() => {
-      callback(null, response(200, { message: 'reduc deleted succesfully' }));
+      callback(null, response(200,
+        {
+          message: 'reduc deleted succesfully'
+        }
+      ));
     })
     .catch(err => response(null, response(err.statusCode, err)));
 };
@@ -234,10 +246,39 @@ module.exports.createUser = (event, context, callback) => {
 };
 
 /**
- * Gets a user
+ * Returns if a user existes or not 
  */
 module.exports.getUser = (event, context, callback) => {
-  callback(null, response(501, { message: 'Not implemented' }));
+  const userid = event.pathParameters.id;
+
+  const params = {
+    Key: {
+      id: userid
+    },
+    TableName: UsersTable
+  };
+
+  return db.get(params)
+    .promise()
+    .then(res => {
+      if (res.Item) {
+        callback(null, response(200,
+          {
+            message: true
+          }
+        ));
+      }
+      else {
+        callback(null, response(404,
+          {
+            error: 'User Not found',
+            message: false
+          }
+        ));
+      }
+    })
+    .catch(err => response(null, response(err.statusCode, err)));
+
 };
 
 /**
@@ -273,5 +314,9 @@ module.exports.addReducToUser = (event, context, callback) => {
  * Gets the user info
  */
 module.exports.infoUser = (event, context, callback) => {
-  callback(null, response(501, { message: 'Not implemented' }));
+  callback(null, response(501,
+    {
+      message: 'Not implemented'
+    }
+  ));
 };

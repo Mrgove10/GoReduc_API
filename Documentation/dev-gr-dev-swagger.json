@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "2020-03-21T15:51:09Z",
+    "version": "2020-03-31T07:49:22Z",
     "title": "dev-gr"
   },
   "host": "jsgve3q5wg.execute-api.us-east-1.amazonaws.com",
