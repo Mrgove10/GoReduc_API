@@ -144,27 +144,27 @@ module.exports.createReduc = (event, context, callback) => {
  */
 module.exports.imageReduc = (event, context, callback) => {
   callback(null, response(501, { message: 'Not implemented' }));
-
-  let buffer = Buffer.from(event.body, 'base64');
-  console.log("Starting File saving!");
-
-  const params = {
-    Bucket: 'goreduc',
-    Key: `${uuid()}.png`,
-    Body: buffer,
-    ContentEncoding: 'base64'
-  };
-
-  s3.putObject(params)
-    .promise()
-    .then(res => {
-      callback(null, response(200,
-        {
-          message: 'item created'
-        }
-      ));
-    })
-    .catch(err => response(null, response(err.statusCode, err)));
+  /*
+    let buffer = Buffer.from(event.body, 'base64');
+    console.log("Starting File saving!");
+  
+    const params = {
+      Bucket: 'goreduc',
+      Key: `${uuid()}.png`,
+      Body: buffer,
+      ContentEncoding: 'base64'
+    };
+  
+    s3.putObject(params)
+      .promise()
+      .then(res => {
+        callback(null, response(200,
+          {
+            message: 'item created'
+          }
+        ));
+      })
+      .catch(err => response(null, response(err.statusCode, err)));*/
 };
 
 /**
@@ -173,8 +173,7 @@ module.exports.imageReduc = (event, context, callback) => {
 module.exports.getReducs = (event, context, callback) => {
   const postid = event.pathParameters.id;
 
-  if (postid == "all") {
-
+  if (postid == "all") { //we want all the reducs
     const params = {
       TableName: ReducsTable
     };
@@ -186,7 +185,7 @@ module.exports.getReducs = (event, context, callback) => {
       })
       .catch(err => response(null, response(err.statusCode, err)));
   }
-  else {
+  else { //we want a particular reduction
 
     const params = {
       Key: {
@@ -214,7 +213,7 @@ module.exports.getReducs = (event, context, callback) => {
 };
 
 /**
- * Update a reduction
+ * 🔴Update a reduction
  */
 module.exports.updateReduc = (event, context, callback) => {
   const postid = event.pathParameters.id;
@@ -248,11 +247,9 @@ module.exports.updateReduc = (event, context, callback) => {
  * 🟢Delete a reduction
  */
 module.exports.deleteReduc = (event, context, callback) => {
-  const postid = event.pathParameters.id;
-
   const params = {
     Key: {
-      id: postid
+      id: event.pathParameters.id
     },
     TableName: ReducsTable
   };
@@ -306,11 +303,9 @@ module.exports.createUser = (event, context, callback) => {
  * 🟢Returns if a user existes or not 
  */
 module.exports.getUser = (event, context, callback) => {
-  const userid = event.pathParameters.id;
-
   const params = {
     Key: {
-      id: userid
+      id: event.pathParameters.id
     },
     TableName: UsersTable
   };
@@ -335,14 +330,13 @@ module.exports.getUser = (event, context, callback) => {
       }
     })
     .catch(err => response(null, response(err.statusCode, err)));
-
 };
 
 /**
   🟢Adds a reduc to the user
   Model
   {
-    ScanId: "32aec8ce"
+    "ScanId": "32aec8ce"
   }
  */
 module.exports.addReducToUser = (event, context, callback) => {
@@ -356,11 +350,11 @@ module.exports.addReducToUser = (event, context, callback) => {
     },
     TableName: UsersTable,
     ConditionExpression: 'attribute_exists(id)',
-    UpdateExpression: 'ADD Reducs :r',
+    UpdateExpression: 'SET Reducs = list_append(Reducs, :r)',
     ExpressionAttributeValues: {
-      ':r': scanid
+      ':r': [scanid]
     },
-    ReturnValues: 'ALL_NEW'
+    ReturnValues: 'UPDATED_NEW'
   };
 
   return db.update(params)
@@ -372,81 +366,55 @@ module.exports.addReducToUser = (event, context, callback) => {
 };
 
 /**
- * Gets the user info
+ * 🟢Gets the user info
  */
 module.exports.infoUser = (event, context, callback) => {
-  callback(null, response(501,
-    {
-      message: 'Not implemented'
-    }
-  ));
-  /*
-  const id = event.pathParameters.id;
-  var reducs = [];
+  if (event.pathParameters.id === null || event.pathParameters.id === undefined) {
+    return callback(null, response(400, { error: 'User id can not be null' }));
+  }
+  //user table parameters
+  const paramsUser = {
+    Key: {
+      id: event.pathParameters.id
+    },
+    TableName: UsersTable
+  };
 
-  //gets all the reducs
-  var paramsreducs = {
+  //reducs table parameters
+  var paramsReducs = {
     TableName: ReducsTable
   };
 
-
-  return db.get(paramsreducs)
+  //gets all the reducs
+  return db.scan(paramsReducs)
     .promise()
     .then(res => {
-      if (res.Item) {
-        reducs = res.Item
-      }
-    })
-    .catch(err => response(null, response(err.statusCode, err)));
+      let allReducs = res.Items;
 
-
-  /*
-  
-    documentClient.scan(params, function (err, data) {
-      if (err) {
-        console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
-        callback(null, response(501, err));
-      } else {
-        console.log("GetReducs succeeded:", JSON.stringify(data, null, 2));
-        reducs = data.Items;
-      }
-    });
-  
-    // we set a timout of 150 milisenconds to make sure the first database request is finished
-    // overwise we might get empty information on the first request
-    setTimeout(() => {
-      //gets the over info of the user
-      var paramsUser = {
-        TableName: UsersTable,
-        Key: {
-          "ID": id,
-        }
-      };
-      documentClient.get(paramsUser, function (err, data) {
-        if (err) {
-          console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
-          callback(err, null);
-        } else {
-          data.Item.ReducsList = [];
-          data.Item.Reducs.forEach(reducUser => {
-            reducs.forEach(reducBase => {
-              if (reducBase.ID == reducUser && reducBase.UserView == true) {
-                data.Item.ReducsList.push(reducBase);
+      //gets the user
+      return db.get(paramsUser)
+        .promise()
+        .then(res => {
+          if (res.Item) { //if we found a user for that id
+            let tempReducList = []
+            allReducs.forEach(generalReduc => {
+              if (res.Item.Reducs.includes(generalReduc.ScanID)) {
+                tempReducList.push(generalReduc)
               }
             });
-          });
-          delete data.Item.Reducs;
-          console.log("GetReducs succeeded:", JSON.stringify(data, null, 2));
-          var response = {
-            "isBase64Encoded": false,
-            "statusCode": 200,
-            "headers": {
-              "Access-Control-Allow-Origin": "*", // Required for CORS support to work
-            },
-            "body": JSON.stringify(data)
-          };
-          callback(null, response);
-        }
-      });
-    }, 150);*/
+            res.Item.Reducs = tempReducList; //replaces all the reductions
+
+            callback(null, response(200, res.Item));
+          }
+          else {
+            callback(null, response(404,
+              {
+                error: 'User Not found'
+              }
+            ));
+          }
+        })
+        .catch(err => response(null, response(err.statusCode, err)));
+    })
+    .catch(err => response(null, response(err.statusCode, err)));
 };
