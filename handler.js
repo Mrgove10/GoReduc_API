@@ -140,31 +140,37 @@ module.exports.createReduc = (event, context, callback) => {
 };
 
 /**
- * Adds an image
+  🟢Adds an image
+  Model
+  { 
+    "base64": "base64 value of the image",
+    "key": "fbbc4d0e"
+  }
  */
 module.exports.imageReduc = (event, context, callback) => {
-  callback(null, response(501, { message: 'Not implemented' }));
-  /*
-    let buffer = Buffer.from(event.body, 'base64');
-    console.log("Starting File saving!");
-  
-    const params = {
-      Bucket: 'goreduc',
-      Key: `${uuid()}.png`,
-      Body: buffer,
-      ContentEncoding: 'base64'
-    };
-  
-    s3.putObject(params)
-      .promise()
-      .then(res => {
-        callback(null, response(200,
-          {
-            message: 'item created'
-          }
-        ));
-      })
-      .catch(err => response(null, response(err.statusCode, err)));*/
+  const reqBody = JSON.parse(event.body);
+  const buf = Buffer.from(reqBody.base64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+  var data = {
+    Bucket: process.env.BUCKET,
+    Key: reqBody.key + '.jpeg',
+    Body: buf,
+    ContentEncoding: 'base64',
+    ContentType: 'image/jpeg',
+    ACL: 'public-read'
+  };
+
+  s3.putObject(data, function (err, data) {
+    if (err) {
+      callback(null, response(500, err));
+    }
+  }).promise()
+    .then(() => {
+      callback(null, response(200,
+        {
+          "url": `https://goreduc.s3.amazonaws.com/${data.Key}`
+        }
+      ));
+    });
 };
 
 /**
@@ -359,8 +365,20 @@ module.exports.addReducToUser = (event, context, callback) => {
 
   return db.update(params)
     .promise()
-    .then(res => {
-      callback(null, response(200, res));
+    .then(() => {
+      const paramsReturn = {
+        TableName: ReducsTable
+      };
+      return db.scan(paramsReturn)
+        .promise()
+        .then(res => {
+          res.Items.forEach(element => {
+            if (element.ScanID == scanid) {
+              callback(null, response(200, element));
+            }
+          })
+        })
+        .catch(err => response(null, response(err.statusCode, err)));
     })
     .catch(err => response(null, response(err.statusCode, err)));
 };

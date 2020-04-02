@@ -5,12 +5,13 @@ custom:
   settings:
     REDUCS_TABLE : gr_reducs
     USERS_TABLE : gr_users
-    BUCKET : gr_images
+    BUCKET : goreduc
 
 #different providers
 provider:
   name: aws
   runtime: nodejs12.x
+  stage: dev
   environment: ${self:custom.settings}
   region: us-east-1
   iamRoleStatements:
