@@ -19,6 +19,10 @@ const UsersTable = process.env.USERS_TABLE;
 function response(statusCode, message) {
   return {
     statusCode: statusCode,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
+    },
     body: JSON.stringify(message)
   };
 }
@@ -38,17 +42,66 @@ function sortByDate(a, b) {
 }
 
 /**
- * Api status
+ * 🟢Api status
  */
 module.exports.status = (event, context, callback) => {
   callback(null, response(202, {
-    staus: "UP",
+    status: "UP",
     serverTime: new Date()
   }));
 };
 
 /**
- * Create a reduc
+ * 🟢Get static variables
+ */
+module.exports.statics = (event, context, callback) => {
+  callback(null, response(202,
+    {
+      Cities: [
+        "Paris",
+        "Grenoble",
+        "Marseille",
+        "Bordeau",
+        "Montpellier",
+        "Lyon",
+        "Nantes",
+        "Toulouse",
+        "Nice",
+        "Lille"
+      ],
+      Categories: [
+        "Shoes",
+        "Jeans",
+        "T-Shirt",
+        "Sock",
+        "Pants",
+        "Sweat",
+        "Hats",
+        "Accessories",
+        "Others"
+      ]
+    }));
+};
+
+/**
+  🟢Create a reduc
+  Model
+  {
+    "Title": "Title",
+    "Description": "Bonjour je suis la desciption",
+    "ProductCategories": [
+      "Shoes",
+      "Jeans"
+    ],  
+    "ReductionPercent": "15",
+    "Valid": true,
+    "UserView": true,
+    "ValidUntil": "2020-02-12T08:14:45.450Z",
+    "ValidStores": [
+      "Grenoble",
+      "Marseille"
+    ]
+  }
  */
 module.exports.createReduc = (event, context, callback) => {
   const reqBody = JSON.parse(event.body);
@@ -115,7 +168,7 @@ module.exports.imageReduc = (event, context, callback) => {
 };
 
 /**
- * Get all reducs
+ * 🟢Get all reducs
  */
 module.exports.getReducs = (event, context, callback) => {
   const postid = event.pathParameters.id;
@@ -192,7 +245,7 @@ module.exports.updateReduc = (event, context, callback) => {
 };
 
 /**
- * Delete a post
+ * 🟢Delete a reduction
  */
 module.exports.deleteReduc = (event, context, callback) => {
   const postid = event.pathParameters.id;
@@ -217,8 +270,12 @@ module.exports.deleteReduc = (event, context, callback) => {
 };
 
 /**
- * Creates a user
- */
+  🟢Creates a user
+  Model
+  {
+    "id":"10734202-e1fc-4df5-81c7-0e65eef0a5f8"
+  }
+*/
 module.exports.createUser = (event, context, callback) => {
   const reqBody = JSON.parse(event.body);
 
@@ -246,7 +303,7 @@ module.exports.createUser = (event, context, callback) => {
 };
 
 /**
- * Returns if a user existes or not 
+ * 🟢Returns if a user existes or not 
  */
 module.exports.getUser = (event, context, callback) => {
   const userid = event.pathParameters.id;
@@ -282,7 +339,11 @@ module.exports.getUser = (event, context, callback) => {
 };
 
 /**
- * Adds a reduc to the user
+  🟢Adds a reduc to the user
+  Model
+  {
+    ScanId: "32aec8ce"
+  }
  */
 module.exports.addReducToUser = (event, context, callback) => {
   const userid = event.pathParameters.id;
@@ -319,4 +380,73 @@ module.exports.infoUser = (event, context, callback) => {
       message: 'Not implemented'
     }
   ));
+  /*
+  const id = event.pathParameters.id;
+  var reducs = [];
+
+  //gets all the reducs
+  var paramsreducs = {
+    TableName: ReducsTable
+  };
+
+
+  return db.get(paramsreducs)
+    .promise()
+    .then(res => {
+      if (res.Item) {
+        reducs = res.Item
+      }
+    })
+    .catch(err => response(null, response(err.statusCode, err)));
+
+
+  /*
+  
+    documentClient.scan(params, function (err, data) {
+      if (err) {
+        console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+        callback(null, response(501, err));
+      } else {
+        console.log("GetReducs succeeded:", JSON.stringify(data, null, 2));
+        reducs = data.Items;
+      }
+    });
+  
+    // we set a timout of 150 milisenconds to make sure the first database request is finished
+    // overwise we might get empty information on the first request
+    setTimeout(() => {
+      //gets the over info of the user
+      var paramsUser = {
+        TableName: UsersTable,
+        Key: {
+          "ID": id,
+        }
+      };
+      documentClient.get(paramsUser, function (err, data) {
+        if (err) {
+          console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+          callback(err, null);
+        } else {
+          data.Item.ReducsList = [];
+          data.Item.Reducs.forEach(reducUser => {
+            reducs.forEach(reducBase => {
+              if (reducBase.ID == reducUser && reducBase.UserView == true) {
+                data.Item.ReducsList.push(reducBase);
+              }
+            });
+          });
+          delete data.Item.Reducs;
+          console.log("GetReducs succeeded:", JSON.stringify(data, null, 2));
+          var response = {
+            "isBase64Encoded": false,
+            "statusCode": 200,
+            "headers": {
+              "Access-Control-Allow-Origin": "*", // Required for CORS support to work
+            },
+            "body": JSON.stringify(data)
+          };
+          callback(null, response);
+        }
+      });
+    }, 150);*/
 };

@@ -7,7 +7,7 @@ custom:
     USERS_TABLE : gr_users
     BUCKET : gr_images
 
-
+#different providers
 provider:
   name: aws
   runtime: nodejs12.x
@@ -41,6 +41,17 @@ functions:
     events:
     - http:
         path: /
+        method: get
+
+  #static variables
+  statics:
+    handler: handler.statics
+    description: Static varibles to use in the api 
+    timeout: 5
+    memorySize: 128 
+    events:
+    - http:
+        path: /statics
         method: get
 
   #Reducs
@@ -128,7 +139,7 @@ functions:
         path: /users/{id}/info
         method: get
 
-
+#Configuration of the resources
 resources:
   Resources:
     ReducsTable:
