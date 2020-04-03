@@ -76,7 +76,7 @@ functions:
         method: post
   getReducs:
     handler: handler.getReducs
-    description: Gets a all or a specifique reduction
+    description: Gets a all or a specifique reduction depending on the scanid
     timeout: 5
     memorySize: 128 
     events:
@@ -91,7 +91,7 @@ functions:
     events:
     - http:
         path: /reducs/{id}
-        method: put
+        method: post
   deleteReduc:
     handler: handler.deleteReduc
     description: Deletes a reduc

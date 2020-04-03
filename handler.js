@@ -72,10 +72,10 @@ module.exports.statics = (event, context, callback) => {
       Categories: [
         "Shoes",
         "Jeans",
-        "T-Shirt",
-        "Sock",
+        "T-Shirts",
+        "Socks",
         "Pants",
-        "Sweat",
+        "Sweats",
         "Hats",
         "Accessories",
         "Others"
@@ -136,7 +136,7 @@ module.exports.createReduc = (event, context, callback) => {
     .then(() => {
       callback(null, response(201, reduc));
     })
-    .catch(err => response(null, response(err.statusCode, err)));
+    .catch(err => response(null, response(500, err)));
 };
 
 /**
@@ -174,12 +174,12 @@ module.exports.imageReduc = (event, context, callback) => {
 };
 
 /**
- * 🟢Get all reducs
+ * 🟢Get all reducs or a specifique one with the scanid
  */
 module.exports.getReducs = (event, context, callback) => {
-  const postid = event.pathParameters.id;
+  const scanid = event.pathParameters.id;
 
-  if (postid == "all") { //we want all the reducs
+  if (scanid == "all") { //we want all the reducs
     const params = {
       TableName: ReducsTable
     };
@@ -189,54 +189,70 @@ module.exports.getReducs = (event, context, callback) => {
       .then(res => {
         callback(null, response(200, res.Items.sort(sortByDate)));
       })
-      .catch(err => response(null, response(err.statusCode, err)));
+      .catch(err => response(null, response(500, err)));
   }
   else { //we want a particular reduction
 
     const params = {
-      Key: {
-        id: postid
-      },
       TableName: ReducsTable
     };
-
-    return db.get(params)
+    let total = 0;
+    return db.scan(params)
       .promise()
       .then(res => {
-        if (res.Item) {
-          callback(null, response(200, res.Item));
-        }
-        else {
-          callback(null, response(404,
-            {
-              error: 'Reduc Not found'
-            }
-          ));
+        res.Items.forEach(item => {
+          if (item.ScanID == scanid) {
+            callback(null, response(200, item));
+            total++;
+          }
+        })
+        if(total === 0){
+          callback(null, response(404, "Not found"));
         }
       })
-      .catch(err => response(null, response(err.statusCode, err)));
+      .catch(err => response(null, response(500, err)));
   }
 };
 
 /**
- * 🔴Update a reduction
+ * 🟢Update a reduction
  */
 module.exports.updateReduc = (event, context, callback) => {
-  const postid = event.pathParameters.id;
+  const reducid = event.pathParameters.id;
   const reqBody = JSON.parse(event.body);
-  const paramName = body.paramName;
-  const paramValue = body.paramValue;
+
+  const newTitle = reqBody.Title
+  const newDescription = reqBody.Description
+  const newProductCategories = reqBody.ProductCategories
+  const newReductionPercent = reqBody.ReductionPercent
+  const newValid = reqBody.Valid
+  const newValidUntil = reqBody.ValidUntil
+  const newValidStores = reqBody.ValidStores
+  const newUserView = reqBody.UserView
 
   const params = {
     Key: {
-      id: postid
+      id: reducid
     },
     TableName: ReducsTable,
     ConditionExpression: 'attribute_exists(id)',
-    UpdateExpression: 'SET title = :title, body = :body',
+    UpdateExpression: `SET Title = :title,
+    Description = :desscription,
+    ProductCategories = :ProductCategories,
+    ValidStores = :ValidStores,
+    ReductionPercent = :ReductionPercent,
+    newValid = :newValid,
+    ValidUntil = :ValidUntil,
+    UserView = :UserView`,
     ExpressionAttributeValues: {
-      ':title': title,
-      ':body': body
+      ':title': newTitle,
+      ':desscription': newDescription,
+      ':ProductCategories': newProductCategories,
+      ':ReductionPercent': newReductionPercent,
+      ':newValid': newValid,
+      ':ValidUntil': newValidUntil,
+      ':ValidStores': newValidStores,
+      ':UserView': newUserView
     },
     ReturnValues: 'ALL_NEW'
   };
@@ -246,7 +262,10 @@ module.exports.updateReduc = (event, context, callback) => {
     .then(res => {
       callback(null, response(200, res));
     })
-    .catch(err => response(null, response(err.statusCode, err)));
+    .catch(err => {
+      callback(null, response(500, err));
+      //    response(null, response(500, err))
+    });
 };
 
 /**
@@ -269,7 +288,7 @@ module.exports.deleteReduc = (event, context, callback) => {
         }
       ));
     })
-    .catch(err => response(null, response(err.statusCode, err)));
+    .catch(err => response(null, response(500, err)));
 };
 
 /**
@@ -302,7 +321,7 @@ module.exports.createUser = (event, context, callback) => {
     .then(() => {
       callback(null, response(201, user));
     })
-    .catch(err => response(null, response(err.statusCode, err)));
+    .catch(err => response(null, response(500, err)));
 };
 
 /**
@@ -335,7 +354,7 @@ module.exports.getUser = (event, context, callback) => {
         ));
       }
     })
-    .catch(err => response(null, response(err.statusCode, err)));
+    .catch(err => response(null, response(500, err)));
 };
 
 /**
@@ -376,11 +395,11 @@ module.exports.addReducToUser = (event, context, callback) => {
             if (element.ScanID == scanid) {
               callback(null, response(200, element));
             }
-          })
+          });
         })
-        .catch(err => response(null, response(err.statusCode, err)));
+        .catch(err => response(null, response(500, err)));
     })
-    .catch(err => response(null, response(err.statusCode, err)));
+    .catch(err => response(null, response(500, err)));
 };
 
 /**
@@ -414,10 +433,10 @@ module.exports.infoUser = (event, context, callback) => {
         .promise()
         .then(res => {
           if (res.Item) { //if we found a user for that id
-            let tempReducList = []
+            let tempReducList = [];
             allReducs.forEach(generalReduc => {
               if (res.Item.Reducs.includes(generalReduc.ScanID)) {
-                tempReducList.push(generalReduc)
+                tempReducList.push(generalReduc);
               }
             });
             res.Item.Reducs = tempReducList; //replaces all the reductions
@@ -432,7 +451,7 @@ module.exports.infoUser = (event, context, callback) => {
             ));
           }
         })
-        .catch(err => response(null, response(err.statusCode, err)));
+        .catch(err => response(null, response(500, err)));
     })
-    .catch(err => response(null, response(err.statusCode, err)));
+    .catch(err => response(null, response(500, err)));
 };
