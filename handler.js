@@ -100,10 +100,12 @@ module.exports.statics = (event, context, callback) => {
     "ValidStores": [
       "Grenoble",
       "Marseille"
-    ]
+    ],
+    "image":"base64 of the image"
   }
  */
 module.exports.createReduc = (event, context, callback) => {
+
   const reqBody = JSON.parse(event.body);
 
   if (!reqBody.Title && reqBody.Title.trim() === "" && !reqBody.Description && reqBody.Description.trim() === "") {
@@ -206,7 +208,7 @@ module.exports.getReducs = (event, context, callback) => {
             total++;
           }
         })
-        if(total === 0){
+        if (total === 0) {
           callback(null, response(404, "Not found"));
         }
       })
