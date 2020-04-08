@@ -29,6 +29,18 @@ provider:
         - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.REDUCS_TABLE}"
         - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.USERS_TABLE}"
         - "arn:aws:s3:::${self:custom.settings.BUCKET}/*"
+  apiKeys:
+    - devKey
+    - applicationKey
+    - websiteKey
+  usagePlan:
+    quota:
+      limit: 999999
+      offset: 0
+      period: DAY
+    throttle:
+      burstLimit: 200
+      rateLimit: 100
 
 
 #All the functions and there endpoints
@@ -43,6 +55,7 @@ functions:
     - http:
         path: /
         method: get
+        private: true
 
   #static variables
   statics:
@@ -54,6 +67,8 @@ functions:
     - http:
         path: /statics
         method: get
+        #private: true
+        cors : true
 
   #Reducs
   createReduc:
@@ -65,6 +80,7 @@ functions:
     - http:
         path: /reducs/create
         method: post
+        cors : true
   imageReduc:
     handler: handler.imageReduc
     description: Creates post am image for a reduction
@@ -101,6 +117,7 @@ functions:
     - http:
         path: /reducs/{id}
         method: delete
+        cors : true
   
   #Users
   createUser:
